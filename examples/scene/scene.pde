@@ -6,6 +6,7 @@ Scene blue;
 
 void setup() {
   size(800, 600);
+  frameRate(150);
   red = scenes.createScene();
   green = scenes.createScene();
   blue = scenes.createScene();
