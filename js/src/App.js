@@ -3,45 +3,57 @@ import './App.css';
 import Sketch from './Sketch';
 import p5 from 'p5';
 import "p5/lib/addons/p5.sound";
+import "p5/lib/addons/p5.dom";
+import sketches from './sketches'
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {}
+  }
+  componentDidMount() {
+    this.selectSketch('midi')
+  }
+  getSketches() {
+    const current = this.state.selectedSketch
+    const results = []
+    for (let [name, sketch] of Object.entries(sketches)) {
+      const item = {name, sketch, selected: sketch === current}
+      results.push(item)
+    }
+    return results
+  }
+  selectSketch(sketchName) {
+    console.log('selecting', sketchName)
+    for (let [name, sketch] of Object.entries(sketches)) {
+      if (sketchName === name) {
+        this.setState({selectedSketch: {name, sketch, selected: true}})
+      }
+    }
+  }
   render() {
     return (
       <div className="App">
-        <Sketch run={mySketch} />
+        <Controls current={this.state.selectedSketch} sketches={this.getSketches()} onChange={sketch => this.selectSketch(sketch)} />
+        <Display sketch={this.state.selectedSketch} />
       </div>
     );
   }
-}  
+}
 
-function mySketch(s) {
-  let soundFile;
-  let fft;
-  const fftBands = 512;
-  let frequencySpectrum;
+function Controls({onChange, sketches, current}) {
+  return <div id='controls'>
+    <select value={current && current.name} onChange={e => onChange(e.target.value)}>
+      <option>Select one...</option>
+      {sketches.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+    </select>
+  </div>
+}
 
-  s.preload = () => {
-    soundFile = s.loadSound('stinger.wav')
-    s.masterVolume(0.2);
-    fft = new p5.FFT()
-  }
+function Display({sketch}) {
+  if (!sketch) return null;
 
-  s.setup = () => {
-    s.createCanvas(s.windowWidth, s.windowHeight);
-    soundFile.play();
-  }
-
-  s.draw = () => {
-    s.background(0);
-    frequencySpectrum = fft.analyze()
-    s.ellipse(10, 10, 10, 10);
-    s.noStroke();
-    for (let i = 0; i< fftBands; i++){
-      let x = s.map(i, 0, fftBands, 0, s.width);
-      let h = -s.height + s.map(frequencySpectrum[i], 0, 255, s.height, 0);
-      s.rect(x, s.height, s.width/fftBands, h) ;
-    }
-  }
+  return <Sketch run={sketch.sketch} />
 }
 
 export default App;
