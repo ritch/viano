@@ -8,5 +8,6 @@ export default {
   equalizer,
   position,
   video,
-  midi
+  midi,
+  song
 }

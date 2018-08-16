@@ -11,7 +11,6 @@ let lofi = false
 let transparency = 1
 let tDelta = -0.01
 
-
 export default function song(s) {
   s.setup = () => {
     song = new Song(107, 'Gmaj', s)

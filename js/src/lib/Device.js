@@ -49,12 +49,51 @@ Mixolydian Mode is: R, W, W, H, W, W, H, W.
 
 const MAJOR = 'maj'
 const MINOR = 'min'
+const UNISON = 'uni'
 const DIM = 'dim'
+const PERFECT = 'perfect'
+const SHARP = '#'
+const FLAT = 'b'
 const SCALE_NOTES = 7
+const NOTE_MODES = []
 const NOTES = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 const STEPS = {
   [MAJOR]: [2, 2, 1, 2, 2, 2, 1],
   [MINOR]: [2, 1, 2, 2, 1, 2, 2]
+}
+const OCTAVE_NOTES = 12
+
+const INTERVALS = [
+  new Interval(0, 'unison', UNISON),
+  new Interval(1, 'minor 2nd', MINOR),
+  new Interval(2, 'major 2nd', MAJOR),
+  new Interval(3, 'minor 3rd', MINOR),
+  new Interval(4, 'major 3rd', MAJOR),
+  new Interval(5, 'perfect 4th', PERFECT),
+  new Interval(6, 'tritone', DIM),
+  new Interval(7, 'perfect 5th', PERFECT),
+  new Interval(8, 'minor 6th', MINOR),
+  new Interval(9, 'major 6th', MAJOR),
+  new Interval(10, 'minor 7th', MINOR),
+  new Interval(11, 'major 7th', MAJOR),
+  new Interval(12, 'major 7th', MAJOR)
+]
+
+class Interval {
+  constructor(halfSteps, name, type) {
+    // halfSteps from the tonic
+    this.halfSteps = halfSteps
+    this.name = name
+    this.type = type
+  }
+  static resolve(a, b) {
+    const halfSteps = b.diff(a)
+    return INTERVALS[halfSteps % SCALE_NOTES]
+  }
+  toNote(tonic) {
+    const tonicNote = new Note(tonic)
+    return tonicNote.transpose(this.halfSteps)
+  }
 }
 
 function getStepsForMode(mode) {
@@ -66,15 +105,44 @@ function getStepsForMode(mode) {
   }
 }
 
+const TYPE_MODS = {
+  [SHARP]: 1,
+  [FLAT]: -1
+}
+
 class Note {
-  constructor(letter, mode) {
-    this.letter = letter
-    this.mode = mode
+  constructor(letter, octave, type) {
+    this.letter = letter.toUpperCase()
+    this.octave = octave
+    assert(octave > 0, 'octave must be positive')
+    this.type = type
+    const letterIdx = NOTES.indexOf(this.letter)
+    const typeModifier = TYPE_MODS[type] || 0
+    assert(letterIdx >= 0, 'invalid note letter ' + letter)
+    this.chromaticIdx = letterIdx + typeModifier
   }
-  step(n) {
-    // this should return the note n steps from this note
-    assert(false, 'Note#step() isnt impld')
+  transpose(halfSteps) {
+    const n = this.toNoteNumber()
+    return Note.fromNoteNumber(n + halfSteps)
   }
+  diff(note) {
+    return this.toNoteNumber() - note.toNoteNumber()
+  }
+  toNoteNumber(octave) {
+    const octaveIdx = this.chromaticIdx
+    const octaveOffset = octave * OCTAVE_NOTES
+    return octaveIdx + octaveIdx
+  }
+  static fromNoteNumber(n) {
+    const octaveIdx = n % OCTAVE_NOTES
+    const octave = Math.floor(n / OCTAVE_NOTES)
+    const a = new Note('A', octave)
+    return a.transpose(octaveIdx)
+  }
+}
+
+const noteToFreq = (x, reference = 440, refIdx = 12 * 5, K = OCTAVE_NOTES) => {
+  return Math.pow(2, (x - refIdx) / K) * reference
 }
 
 class MidiNote {
@@ -83,11 +151,19 @@ class MidiNote {
     this.octave = octave
   }
   toMusicNote() {
-
+    return Note.fromNoteNumber(this.num * (this.octave + 1))
   }
 }
 
 const VALID_MODES = [MAJOR, MINOR]
+class ChromaticScale {
+  constructor(flats) {
+    this.flats = flasts
+  }
+  notes() {
+    return INTERVALS.map(interval => interval.toNote())
+  }
+}
 
 class Scale {
   constructor(tonic, mode = MAJOR) {
@@ -95,7 +171,7 @@ class Scale {
     this.mode = mode
     assert(VALID_MODES.includes(mode), `${mode} is not a valid mode`)
   }
-  static fromName(name) {
+  static fromName(name, octave = 4) {
     let noteLetter = name.substr(0, 1)
     let mode = 'maj'
     let noteMode
@@ -109,7 +185,7 @@ class Scale {
       mode = name.substr(scaleModeIdx)
     }
     
-    const musicNote = new Note(noteLetter, noteMode)
+    const musicNote = new Note(noteLetter, octave, noteMode)
     return new Scale(musicNote, mode)
   }
   notes() {
@@ -118,7 +194,7 @@ class Scale {
     const notes = [this.tonic]
 
     for (let step of steps) {
-      last = last.step(step)
+      last = last.transpose(step)
       notes.push(last)
     }
     return notes

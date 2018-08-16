@@ -12,7 +12,7 @@ class App extends Component {
     this.state = {}
   }
   componentDidMount() {
-    this.selectSketch('midi')
+    this.selectSketch('song')
   }
   getSketches() {
     const current = this.state.selectedSketch
