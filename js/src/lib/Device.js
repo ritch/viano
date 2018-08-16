@@ -57,11 +57,14 @@ const FLAT = 'b'
 const SCALE_NOTES = 7
 const NOTE_MODES = []
 const NOTES = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
-const STEPS = {
-  [MAJOR]: [2, 2, 1, 2, 2, 2, 1],
-  [MINOR]: [2, 1, 2, 2, 1, 2, 2]
-}
 const OCTAVE_NOTES = 12
+
+// other modes
+const PHRYGIAN = 'phrygian'
+const LYDIAN = 'lydian'
+const MIXOLYDIAN = 'mixolydian'
+const AEOLIAN = 'aeolian'
+const LOCRIAN = 'locrian'
 
 const INTERVALS = [
   new Interval(0, 'unison', UNISON),
@@ -102,6 +105,16 @@ function getStepsForMode(mode) {
       return [2, 2, 1, 2, 2, 2, 1]
     case MINOR:
       return [2, 1, 2, 2, 1, 2, 2]
+    case PHRYGIAN:
+      return [1, 2, 2, 2, 1, 2, 2]
+    case LYDIAN:
+      return [2, 2, 2, 1, 2, 2, 1]
+    case MIXOLYDIAN:
+      return [2, 2, 1, 2, 2, 1, 2]
+    case AEOLIAN:
+      return [2, 1, 2, 2, 1, 2, 2]
+    case LOCRIAN:
+      return [1, 2, 2, 1, 2, 2, 2]
   }
 }
 
