@@ -1,42 +1,4 @@
-import WebMidi from 'webmidi';
 import assert from './assert'
-
-let enabled = false
-let enabling;
-async function ensureEnabled() {
-  if (enabling) return enabling
-  if (enabled) {
-    return
-  }
-  enabling = new Promise((resolve, reject) => {
-    WebMidi.enable(function (err) {
-      if (err) return reject(err)
-      resolve()
-    })
-  })
-  return enabling
-}
-
-class InputDevice {
-  static async list() {
-    const Type = this
-    await ensureEnabled()
-    return WebMidi.inputs.map(input => new Type(input))
-  }
-  static async getByName(name) {
-    const all = await InputDevice.list()
-    for (let input of all) {
-      if (input.name === name) {
-        return input
-      }
-    }
-    throw new Error(`Could not find InputDevice with name "${name}"`)
-  }
-  constructor(input) {
-    this.webMidiInput = input
-    this.name = input.name
-  }
-}
 
 /*
 Major Scale: R, W, W, H, W, W, W, H.
@@ -145,7 +107,7 @@ export class Note {
   }
   toNoteNumber() {
     const octaveIdx = this.chromaticIdx
-    const octaveOffset = (this.octave + 1) * OCTAVE_NOTES
+    const octaveOffset = this.octave * OCTAVE_NOTES
     return octaveIdx + octaveOffset
   }
   static fromNoteNumber(n) {
@@ -155,23 +117,13 @@ export class Note {
     return a.transpose(octaveIdx)
   }
   toFreq() {
-    const n = this.toNoteNumber()
+    const n = this.toNoteNumber() + OCTAVE_NOTES
     return noteToFreq(n)
   }
 }
 
 const noteToFreq = (x, reference = 440, refIdx = 12 * 5, K = OCTAVE_NOTES) => {
   return Math.pow(2, (x - refIdx) / K) * reference
-}
-
-export class MidiNote {
-  constructor(num, octave) {
-    this.num = num
-    this.octave = octave
-  }
-  toMusicNote() {
-    return Note.fromNoteNumber(this.num * (this.octave + 1))
-  }
 }
 
 const VALID_MODES = [MAJOR, MINOR]
@@ -217,29 +169,5 @@ export class Scale {
       notes.push(last)
     }
     return notes
-  }
-}
-
-export class Piano extends InputDevice {
-
-}
-
-export class OutputDevice {
-  static async list() {
-    await ensureEnabled()
-    return WebMidi.outputs.map(input => new OutputDevice(input))
-  }
-  static async getByName(name) {
-    const all = await OutputDevice.list()
-    for (let output of all) {
-      if (output.name === name) {
-        return input
-      }
-    }
-    throw new Error(`Could not find OutputDevice with name "${name}"`)
-  }
-  constructor(output) {
-    this.webMidiOutput = output
-    this.name = output.name
   }
 }
