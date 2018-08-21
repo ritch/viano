@@ -63,6 +63,10 @@ export default class Piano {
     if (!isDown) return 0
     return this.downKeys.get(n)
   }
+  getHeldNotes() {
+    const notes = this.downKeys.keys()
+    return Array.from(notes).map(n => Note.fromNoteNumber(n))
+  }
   keyDown(note, velocity = 127) {
     this.downKeys.set(note.toNoteNumber(), velocity)
     this.osc.freq(note.toFreq())

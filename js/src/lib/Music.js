@@ -142,6 +142,9 @@ export class Note {
   diff(note) {
     return this.toNoteNumber() - note.toNoteNumber()
   }
+  isEqual(note) {
+    return this.diff(note) === 0
+  }
   interval(note) {
     return Interval.resolve(this, note)
   }
@@ -304,3 +307,39 @@ export const CHORDS = [
   CH_DIM,
   CH_AUG
 ]
+
+export class NoteList {
+  constructor(notes) {
+    assert(Array.isArray(notes), 'must be an array')
+    this.hasNotes = notes.length > 0
+    this.notes = notes.sort((a, b) => a.toNoteNumber() - b.toNoteNumber())
+  }
+  lowest() {
+    return this.notes[0]
+  }
+  toIntervals(root) {
+    const all = this.notes.map(note => Interval.resolve(root, note))
+    return all.filter(interval => interval.type !== UNISON)
+  }
+  isEqual(list) {
+    assert(list instanceof NoteList)
+    if (this.notes.length === list.notes.length) {
+      for (let i = 0; i < this.notes.length; i++) {
+        if (!this.notes[i].isEqual(list.notes[i])) {
+          return false
+        }
+      }
+      return true
+    }
+    return false
+  }
+  toExactChord() {
+    const root = this.lowest()
+    for (let chord of CHORDS) {
+      const list = new NoteList(chord.toNotes(root))
+      if (this.isEqual(list)) {
+        return chord
+      }
+    } 
+  }
+}

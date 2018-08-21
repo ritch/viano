@@ -1,7 +1,7 @@
 import p5 from 'p5';
 import pos from '../lib/pos';
 import Piano from '../lib/Piano';
-import {Note, CHORDS} from '../lib/Music'
+import {Note, CHORDS, NoteList} from '../lib/Music'
 
 let piano
 let song
@@ -43,6 +43,18 @@ export default function piano(s) {
       s.textSize(72)
       s.text(chordName, s.windowWidth / 2 - 100, s.windowHeight / 2 + 200)
       s.textSize(12)
+    }
+
+    const heldNotes = piano.getHeldNotes()
+    
+    if (heldNotes.length) {
+      const noteList = new NoteList(heldNotes)
+      const guessedChord = noteList.toExactChord()
+      if (guessedChord) {
+        s.textSize(72)
+        s.text('Guess: ' + noteList.lowest().letter + guessedChord.name, s.windowWidth / 2 - 100, s.windowHeight / 2 + 300)
+        s.textSize(12)
+      }
     }
   }
 }
