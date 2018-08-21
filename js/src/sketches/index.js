@@ -4,6 +4,7 @@ import video from './video';
 import song from './song';
 import midi from './midi';
 import piano from './piano';
+import chords from './chords';
 
 export default {
   equalizer,
@@ -11,5 +12,6 @@ export default {
   video,
   midi,
   song,
-  piano
+  piano,
+  chords
 }

@@ -65,12 +65,21 @@ export default class Piano {
   }
   keyDown(note, velocity = 127) {
     this.downKeys.set(note.toNoteNumber(), velocity)
-    console.log(note.toFreq())
     this.osc.freq(note.toFreq())
     this.osc.amp(0.1)
   }
   keyUp(note) {
     this.downKeys.delete(note.toNoteNumber())
     this.osc.amp(0)
+  }
+  keysDown(notes, velocity = 127) {
+    for (let note of notes) {
+      this.keyDown(note, velocity)
+    }
+  }
+  keysUp(notes, velocity = 127) {
+    for (let note of notes) {
+      this.keyUp(note, velocity)
+    }
   }
 }

@@ -42,8 +42,7 @@ export class Interval {
     return INTERVALS[halfSteps % SCALE_NOTES]
   }
   toNote(tonic) {
-    const tonicNote = new Note(tonic)
-    return tonicNote.transpose(this.halfSteps)
+    return tonic.transpose(this.halfSteps)
   }
 }
 
@@ -106,7 +105,7 @@ const TYPE_MODS = {
 }
 
 export class Note {
-  constructor(letter, octave, type = NATURAL) {
+  constructor(letter, octave = 3, type = NATURAL) {
     this.letter = letter.toUpperCase()
     this.octave = octave
     assert(octave >= 0, 'octave must be positive or 0')
@@ -225,11 +224,12 @@ export class Scale {
 }
 
 class Chord {
-  constructor(intervals) {
+  constructor(intervals, name) {
     this.intervals = intervals // Interval[]
+    this.name = name
   }
-  add(interval) {
-    return new Chord([...this.intervals, interval])
+  add(interval, name) {
+    return new Chord([...this.intervals, interval], name)
   }
   toNotes(root) {
     const others = this.intervals.map(interval => interval.toNote(root))
@@ -238,47 +238,47 @@ class Chord {
 }
 
 // C - C major
-const CH_MAJOR = new Chord([MAJOR_3RD, PERFECT_5TH])
+const CH_MAJOR = new Chord([MAJOR_3RD, PERFECT_5TH], MAJOR)
 // Cm - C minor 
-const CH_MINOR = new Chord([MINOR_3RD, PERFECT_5TH])
+const CH_MINOR = new Chord([MINOR_3RD, PERFECT_5TH], MINOR)
 // C7 - C dominant seventh
-const CH_7 = CH_MAJOR.add(MINOR_7TH)
+const CH_7 = CH_MAJOR.add(MINOR_7TH, '7')
 // Cm7 - C minor seventh
-const CH_MIN_7 = CH_MINOR.add(MINOR_7TH)
+const CH_MIN_7 = CH_MINOR.add(MINOR_7TH, 'm7')
 // Cmaj7 - C major seventh
-const CH_MAJ_7 = CH_MAJOR.add(MAJOR_7TH)
+const CH_MAJ_7 = CH_MAJOR.add(MAJOR_7TH, 'maj7')
 // C6 - C major sixth
-const CH_MAJ_6 = CH_MAJOR.add(MAJOR_6TH)
+const CH_MAJ_6 = CH_MAJOR.add(MAJOR_6TH, '6')
 // Cm6 - C minor sixth
-const CH_MIN_6 = CH_MINOR.add(MINOR_6TH)
+const CH_MIN_6 = CH_MINOR.add(MINOR_6TH, 'm6')
 // C6/9 - C sixth/ninth
-const CH_SIXTH_NINTH = CH_MAJ_6.add(MINOR_9TH)
+const CH_SIXTH_NINTH = CH_MAJ_6.add(MINOR_9TH, '6/9')
 // C5 - C fifth
-const CH_5 = new Chord([PERFECT_5TH])
+const CH_5 = new Chord([PERFECT_5TH], '5')
 // C9 - C dominant ninth
-const CH_9 = CH_7.add(MAJOR_9TH)
+const CH_9 = CH_7.add(MAJOR_9TH, '9')
 // Cm9 - C minor ninth
-const CH_MIN_9 = CH_MIN_7.add(MINOR_9TH)
+const CH_MIN_9 = CH_MIN_7.add(MINOR_9TH, 'm9')
 // Cmaj9 - C major ninth
-const CH_MAJ_9 = CH_MAJ_7.add(MAJOR_9TH)
+const CH_MAJ_9 = CH_MAJ_7.add(MAJOR_9TH, 'maj9')
 // C11 - C eleventh
-const CH_11 = CH_9.add(MAJOR_11TH)
+const CH_11 = CH_9.add(MAJOR_11TH, '11')
 // C13 - C thirteenth
-const CH_13 = CH_11.add(MAJOR_13TH)
+const CH_13 = CH_11.add(MAJOR_13TH, '13')
 // Cadd - C add
-const CH_ADD_9 = CH_MAJOR.add(MAJOR_9TH)
-const CH_ADD_2 = CH_MAJOR.add(MAJOR_2ND)
+const CH_ADD_9 = CH_MAJOR.add(MAJOR_9TH, 'add9')
+const CH_ADD_2 = CH_MAJOR.add(MAJOR_2ND, 'add2')
 // C7-5 - C seven minus five
-const CH_7_FLAT_5 = new Chord([MAJOR_3RD, TRITONE, MINOR_7TH])
+const CH_7_FLAT_5 = new Chord([MAJOR_3RD, TRITONE, MINOR_7TH], '7b5')
 // C7+5 - C seven plus five
-const CH_7_SHARP_5 = new Chord([MAJOR_3RD, MINOR_6TH, MINOR_7TH])
+const CH_7_SHARP_5 = new Chord([MAJOR_3RD, MINOR_6TH, MINOR_7TH], '7#5')
 // Csus - C suspended
-const CH_SUS2 = CH_5.add(MAJOR_2ND)
-const CH_SUS4 = CH_5.add(PERFECT_4TH)
+const CH_SUS2 = CH_5.add(MAJOR_2ND, 'sus2')
+const CH_SUS4 = CH_5.add(PERFECT_4TH, 'sus4')
 // Cdim - C diminished
-const CH_DIM = new Chord([MINOR_3RD, TRITONE])
+const CH_DIM = new Chord([MINOR_3RD, TRITONE], 'dim')
 // Caug - C augmented
-const CH_AUG = new Chord([MAJOR_3RD, MINOR_6TH])
+const CH_AUG = new Chord([MAJOR_3RD, MINOR_6TH], 'aug')
 
 export const CHORDS = [
   CH_MAJOR,

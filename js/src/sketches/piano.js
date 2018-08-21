@@ -9,7 +9,7 @@ let song
 
 let animatedNotes = []
 
-export default function song(s) {
+export default function piano(s) {
   s.setup = () => {
     s.createCanvas(s.windowWidth, s.windowHeight)
     piano = new Piano(88, s)
